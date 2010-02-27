@@ -1,0 +1,7 @@
+Welcome to the BAAM project
+
+This is a collaboration between Sami Boudelaa (neurocognitive psycholinguist) and Ian Nimmo-Smith (statistician and python hacker), both of the Medical Research Council's Cognition and Brain Sciences Unit, Cambridge UK. (http://www.mrc-cbu.cam.ac.uk).
+
+The code is in a state of transition.
+
+BAAM.py was a working version which had got into a very complicated state. So I froze it and started to unpack it into a new version called BANARM.py where there is an attempt incorporate docstrings and generally make the progam more transparent and maintainable.
