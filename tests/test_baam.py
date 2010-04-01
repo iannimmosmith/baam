@@ -27,8 +27,25 @@ def test_powerset_graycode():
     yield assert_equal, [list(p) for p in baam.powerset_graycode([3,6])], [[], [3], [3, 6], [6]]
 
 def test_two_consonant_expand():
-    yield assert_equal, baam.two_consonant_expand([('','>us~','')]), [[('', '>us~', '')], [('', '>ius~', 'CC[i] '), ('', '>yus~', 'CC[y] '), ('', '>uss~', 'CC2 ')]]
+    yield assert_equal,
+    baam.two_consonant_expand([('','>us~','')]),
+    [[('', '>us~', '')],
+     [('', '>ius~', 'CC[i] '),
+      ('', '>yus~', 'CC[y] '),
+      ('', '>uss~', 'CC2 ')]]
 
 def test_meta_expand():
-    yield assert_equal, baam.meta_expand([('','DAfiy','')]), set([('', 'D%fiy', 'V/5 '), ('' ,'D%fi#', 'C/5 ')])
+    yield assert_equal,
+    baam.meta_expand([('','DAfiy','')]),
+    set([('', 'D%fiy',  'V/5'), ('' ,'D%fi#', 'C/5 ')])
+
+def test_dictionary_sets():
+    '''Create parsed dictionary'''
+    parsed_dictionary = baam.make_parse_dictionary()
+    '''Create frequency dictionaries for stems, roots and patterns'''
+    stem_dictionary = baam.make_BANARM_dictionary('stem_pointed_token')
+    root_dictionary = baam.make_BANARM_dictionary('root_token')
+    pattern_dictionary = baam.make_BANARM_dictionary('pattern_token')
+    answer = baam.dictionary_sets(stem_dictionary, parsed_dictionary)
+    yield assert_equal, answer['commentary'], '' 
      

@@ -295,15 +295,15 @@ def dictionary_sets(stems,dictionary,report=True):
     unique_dictionary_stems = dictionary_stems.difference(corpus_stems)
     unique_corpus_stems = corpus_stems.difference(dictionary_stems)
     common_stems = dictionary_stems.intersection(corpus_stems)
-    if report:
-        commentary = open(baampath+'BANARM.commentary', 'wt')
-        print >> commentary, "There are %d stems in the dictionary" % len(dictionary_stems)
-        print >> commentary, "There are %d stems in the corpus" % len(corpus_stems)
-        print >> commentary, "There are %d stems unique to the dictionary" % len(unique_dictionary_stems)   
-        print >> commentary, "There are %d stems unique to the corpus" % len(unique_corpus_stems)   
-        print >> commentary, "There are %d stems common to both corpus and dictionary" % len(common_stems)
-        commentary.close()
-    return dictionary_stems, corpus_stems, common_stems
+    commentary = ''
+    commentary +=  "There are %d stems in the dictionary\n" % (len(dictionary_stems))
+    commentary += "There are %d stems in the corpus\n" % (len(corpus_stems))
+    commentary += "There are %d stems unique to the dictionary\n" % (len(unique_dictionary_stems))
+    commentary += "There are %d stems unique to the corpus\n" % (len(unique_corpus_stems))
+    commentary += "There are %d stems common to both corpus and dictionary\n"%(len(common_stems))
+    print commentary
+    return {'commentary': commentary, 'stems': dictionary_stems,
+            'corpus': corpus_stems, 'common': common_stems}
 
 analyst(('mu', 'riyH', 'PFX[m] '))
 
