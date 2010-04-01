@@ -4,7 +4,7 @@ Description: Python library for Bayesian ANalysis of ARabic Morphology (BANARM)
 Date: 27 Feb 2010
 '''
 
-import form
+import readexcel as form
 import string
 import cPickle
 import numpy as np
@@ -29,9 +29,11 @@ def parse(prefix_stem_code_list):
 def analyst(prefix_stem_code_triple):
     (prefix,stem,code) = prefix_stem_code_triple
     parts = set([])
-    for (prefix_a,stem_a,code_a) in two_consonant_expand([(prefix,stem,code)]):
-        for (prefix_b,stem_b,code_b) in meta_expand([prefix_a,stem_a,code_a]):
-            parts.update(parse(prefix_b,stem_b,code_b))
+    for p_s_c_list in two_consonant_expand([(prefix,stem,code)]):
+            for (p,s,c) in p_s_c_list:
+                    for psc_b in meta_expand([(p,s,c)]):
+                            (p_b,s_b,c_b) = psc_b
+                            parts.update(parse([(p_b,s_b,c_b)]))
     return list(parts)
 
 def parse_prefix(stem_code):
@@ -161,7 +163,7 @@ def find_root_locations(stem):
 def meta_expand(prefix_stem_code_list):
     '''
     >>>  print(BANARM.meta_expand([('','DAfiy','')]))
-    >>>  set([('D%fiy', 'V/5 '), ('D%fi#', 'C/5 ')])
+    >>>  set([('', 'D%fiy', 'V/5 '), ('', 'D%fi#', 'C/5 ')])
     '''
     expanded = set([])
     for (prefix,stem,code) in prefix_stem_code_list:
@@ -179,7 +181,8 @@ def meta_expand(prefix_stem_code_list):
                 hcode=hcode+str(hp+1)
             if len(h) == 0:
                 hcode = ''
-            expanded.add((list_meta_expand(stem,g,h),code+gcode+hcode+' '))
+            expanded.add((prefix, list_meta_expand(stem,g,h),
+                          code+gcode+hcode+' '))
     return expanded
 
 def add_meta(stem):
@@ -302,7 +305,7 @@ def dictionary_sets(stems,dictionary,report=True):
         commentary.close()
     return dictionary_stems, corpus_stems, common_stems
 
-#analyst(('mu', 'riyH', 'PFX[m] '))
+analyst(('mu', 'riyH', 'PFX[m] '))
 
 ##    expanded_stem_code_list = two_consonant_expand(stem,code)
 ##    parts = set([])
