@@ -23,17 +23,124 @@ tilde = '~'
 
 baampath = r'/home/ian/Sami/baam/'
 
-def parse(prefix_stem_code_list):
-        return prefix_stem_code_list
+def parse_list(prefix_stem_code_list):
+    return [inner for outer in prefix_stem_code_list for inner in parse(outer)]
+
+def parse(p_s_c):
+    (p,s,c)=p_s_c
+    return (p,s,c)    
+
+
+##def parse(stem,code):
+##    raw_code=code
+##    parts = set([])
+##    stemlist=list(stem)
+##    places=find_nonvowel_locations(stem)
+##    if len(places) >= 3:
+##        if '3R' not in raw_code:
+##            code=raw_code+'3R '
+##        for root in generate_combinations(places,3):
+##            try_pattern=list(consonant_meta(stem))
+##            try_root=string.join([try_pattern[x] for x in root],'')
+##            for x in range(3):
+##                try_pattern[root[x]]=slot_names3[x]
+##            try_pattern=string.join(try_pattern,'')
+####            if try_pattern[-1] in 'oN':
+####                parts.add((try_root,try_pattern[:-1],code+'PattTrunc[oN.]'))
+##            if try_root[-1] in 'wyY':
+##                for char in 'wyY':
+##                    if try_root[-1] != char:
+##                        parts.add((try_root[:-1]+char,try_pattern,code+'RootEnd[wyY] '))
+##            parts.add((try_root,try_pattern,code))
+##            if try_pattern[-1] in 'wyY':
+##                for char in 'wyY':
+##                    if try_pattern[-1] != char:
+##                        parts.add((try_root,try_pattern[:-1]+char,code+'PattEnd[wyY] '))
+##            if try_pattern[-1] in "&'}":
+##                for char in "&'}":
+##                    parts.add((try_root,try_pattern[:-1]+char,code+'PattEnd[&] '))
+####            if try_pattern[:2] in ["{i", "<i"]:
+####                for first_two  in ["{i", "<i"]:
+####                    if first_two != try_pattern[:2]:
+####                        parts.add((try_root,first_two+try_pattern[2:],code+'PattInit[{i |<i] '))
+##            if try_pattern[0] in initials:
+##                for first in initials:
+##                    if first != try_pattern[0]:
+##                        parts.add((try_root,first+try_pattern[1:],code+'PattInitGlot '))
+##            if try_root[1] in glottal_medial_root:
+##                for char in glottal_medial_root:
+##                    if try_root[1] != char:
+##                        parts.add((try_root[0]+char+try_root[2],try_pattern,code+'RootMedGlot '))             
+##            if try_root[2] in glottal_final_root:
+##                for char in glottal_final_root:
+##                    if try_root[1] != char:
+##                        parts.add((try_root[:2]+char,try_pattern,code+'RootFinGlot '))             
+##    if len(places) >= 4:
+##        if '4R' not in raw_code:
+##            code=raw_code+'4R '
+##        for root in generate_combinations(places,4):
+##            try_pattern=list(consonant_meta(stem))
+##            try_root=string.join([try_pattern[x] for x in root],'')
+##            for x in range(4):
+##                try_pattern[root[x]]=slot_names4[x]
+##            try_pattern=string.join(try_pattern,'')
+####            if try_pattern[-1] in 'oN':
+####                parts.add((try_root,try_pattern[:-1],code+'FP-'+try_pattern[-1]+' '))
+####            else:
+##            parts.add((try_root,try_pattern,code))
+##            if try_pattern[-1] in "yY":
+##                for char in "yY":
+##                    if try_pattern[1] != char:
+##                        parts.add((try_root,try_pattern[:-1]+char,code+'PattEnd[y|Y] '))
+##            if try_pattern[-1] in "&'}":
+##                for char in "&'}":
+##                    if try_pattern[1] != char:
+##                        parts.add((try_root,try_pattern[:-1]+char,code+"PattEnd[&'}] "))
+####            if try_pattern[:2] in ['{i', '<i']:
+####                for first_two  in ['{i', '<i']:
+####                    if first_two != try_pattern[:2]:
+####                        parts.add((try_root,first_two+try_pattern[2:],code+'PattEnd[{i |<i] '))
+##            if try_pattern[0] in initials:
+##                for first in initials:
+##                    if first != try_pattern[0]:
+##                        parts.add((try_root,first+try_pattern[1:],code+'PattInitGlot '))
+##    cvc = set([])
+##    for (try_root,try_pattern,code) in parts:
+##        last=try_pattern.find('E')
+##        if try_root[1] == 'A':
+##            cvc.add((try_root[0]+"y"+try_root[2],try_pattern[:last]+"aEa"+
+##                try_pattern[last+1:],code+'Sub[A/(y,aEa)] '))
+##            cvc.add((try_root[0]+"w"+try_root[2],try_pattern[:last]+"aEa"+
+##                try_pattern[last+1:],code+'Sub[A/(w,aEa)] '))
+##        if try_root[1] == 'w':
+##            cvc.add((try_root[0]+"w"+try_root[2],try_pattern[:last]+"uEu"+
+##                try_pattern[last+1:],code+'Sub[w/(w,uEu)] '))
+##        if try_root[1] == 'y':
+##            cvc.add((try_root[0]+"y"+try_root[2],try_pattern[:last]+"iEi"+
+##                try_pattern[last+1:],code+'Sub[y/(y,iEi)] '))
+##    parts.update(cvc)
+####    oddsandends = set([])
+####    for (root,pattern) in parts:
+####        if root[2] in "Yyw":
+####            for ending in "Yyw":
+####                oddsandends.add((root[0:2]+ending,pattern))
+####        if root[1] in "Awy":
+####            for middle in "Awy":
+####                oddsandends.add((root[0]+middle+root[2],pattern))
+####        if root[2] in glottal_stops:
+####            for ending in glottal_stops:
+####                oddsandends.add((root[0:2]+ending,pattern))
+####    parts.update(oddsandends)
+##    return parts
 
 def analyst(prefix_stem_code_triple):
     (prefix,stem,code) = prefix_stem_code_triple
     parts = set([])
-    for p_s_c_list in two_consonant_expand([(prefix,stem,code)]):
-            for (p,s,c) in p_s_c_list:
-                    for psc_b in meta_expand([(p,s,c)]):
-                            (p_b,s_b,c_b) = psc_b
-                            parts.update(parse([(p_b,s_b,c_b)]))
+    for p_s_c in two_consonant_expand([(prefix,stem,code)]):
+        (p,s,c)=p_s_c
+        for psc_b in meta_expand([(p,s,c)]):
+            (p_b,s_b,c_b) = psc_b
+            parts.update(parse([(p_b,s_b,c_b)]))
     return list(parts)
 
 def parse_prefix(stem_code):
@@ -154,7 +261,7 @@ def two_consonant_expand(prefix_stem_code_list):
                 (prefix,stem[:places[0]+1]+"y"+stem[places[1]-1:],code+'CC[y] '),
                 (prefix,stem[:places[1]]+stem[places[1]]+stem[places[1]:],code+'CC2 ')
                 ])
-    return expanded_prefix_stem_code_list
+    return [inner for outer in expanded_prefix_stem_code_list for inner in outer]
   
 def find_root_locations(stem):
     """List places where stem has potential root""" 
@@ -301,11 +408,11 @@ def dictionary_sets(stems,dictionary,report=True):
     commentary += "There are %d stems unique to the dictionary\n" % (len(unique_dictionary_stems))
     commentary += "There are %d stems unique to the corpus\n" % (len(unique_corpus_stems))
     commentary += "There are %d stems common to both corpus and dictionary\n"%(len(common_stems))
-    print commentary
+    #print commentary
     return {'commentary': commentary, 'stems': dictionary_stems,
             'corpus': corpus_stems, 'common': common_stems}
 
-analyst(('mu', 'riyH', 'PFX[m] '))
+#analyst(('mu', 'riyH', 'PFX[m] '))
 
 ##    expanded_stem_code_list = two_consonant_expand(stem,code)
 ##    parts = set([])
