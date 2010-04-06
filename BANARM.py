@@ -1,7 +1,7 @@
 '''
 Author: Ian Nimmo-Smith
 Description: Python library for Bayesian ANalysis of ARabic Morphology (BANARM)
-Date: 27 Feb 2010
+Date: 06 Apr 2010
 '''
 
 import readexcel as form
@@ -24,12 +24,11 @@ tilde = '~'
 baampath = r'/home/ian/Sami/baam/'
 
 def parse_list(prefix_stem_code_list):
-    return [inner for outer in prefix_stem_code_list for inner in parse(outer)]
+    return [parse(outer) for outer in prefix_stem_code_list]
 
 def parse(p_s_c):
     (p,s,c)=p_s_c
     return (p,s,c)    
-
 
 ##def parse(stem,code):
 ##    raw_code=code
@@ -133,15 +132,29 @@ def parse(p_s_c):
 ####    parts.update(oddsandends)
 ##    return parts
 
-def analyst(prefix_stem_code_triple):
-    (prefix,stem,code) = prefix_stem_code_triple
-    parts = set([])
-    for p_s_c in two_consonant_expand([(prefix,stem,code)]):
-        (p,s,c)=p_s_c
-        for psc_b in meta_expand([(p,s,c)]):
-            (p_b,s_b,c_b) = psc_b
-            parts.update(parse([(p_b,s_b,c_b)]))
-    return list(parts)
+def analyst(prefix_stem_code):
+    psc_c = two_consonant_expand([prefix_stem_code])
+    #psc_m = sum(map(meta_expand, psc_c),[])
+    psc_m = mlsq(meta_expand, psc_c)
+    psc_p = mlsq(parse,psc_m)
+    return psc_p
+
+def mlsq(fun,lis):
+    # fun is a function
+    # lis is a list
+
+    #function to flatten and uniquify
+    #the application of a function to a list
+    #It is assumed that fun returns a list of results
+    return list(set(sum([[apply(fun,[el]) for el in lis]],[])))
+
+
+def f3(seq):
+    # Not order preserving
+    keys = {}
+    for e in seq:
+        keys[e] = 1
+    return keys.keys()
 
 def parse_prefix(stem_code):
     '''
@@ -267,13 +280,31 @@ def find_root_locations(stem):
     """List places where stem has potential root""" 
     return [x for x in range(len(stem)) if stem[x] not in 'aeiou~']
     
-def meta_expand(prefix_stem_code_list):
+def meta_expand(prefix_stem_code):
     '''
     >>>  print(BANARM.meta_expand([('','DAfiy','')]))
     >>>  set([('', 'D%fiy', 'V/5 '), ('', 'D%fi#', 'C/5 ')])
     '''
     expanded = set([])
-    for (prefix,stem,code) in prefix_stem_code_list:
+    prefix,stem,code = prefix_stem_code
+    stem=add_meta(stem)
+    places = find_meta_characters(stem)
+    for g in powerset_graycode(places):
+        gcode='C/'
+        for gp in g:
+            gcode=gcode+str(gp+1)
+        if len(g) == 0:
+            gcode = ''
+        h = places.difference(g)
+        hcode='V/'
+        for hp in h:
+            hcode=hcode+str(hp+1)
+        if len(h) == 0:
+            hcode = ''
+        expanded.add((prefix, list_meta_expand(stem,g,h),
+                      code+gcode+hcode+' '))
+        '''
+        for (prefix,stem,code) in prefix_stem_code_list:
         stem=add_meta(stem)
         places = find_meta_characters(stem)
         for g in powerset_graycode(places):
@@ -290,8 +321,12 @@ def meta_expand(prefix_stem_code_list):
                 hcode = ''
             expanded.add((prefix, list_meta_expand(stem,g,h),
                           code+gcode+hcode+' '))
-    return expanded
+        '''
+    return list(expanded)
 
+def meta_expand_list(psc_list):
+    return sum([meta_expand(outer) for outer in psc_list],[])
+        
 def add_meta(stem):
     '''
     Helper function for meta_expand function

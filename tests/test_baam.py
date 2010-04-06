@@ -8,7 +8,20 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 import BANARM as baam
 
+def test_analyst():
+    yield assert_equal, baam.analyst(('mu', 'riyH', 'PFX[m] ')), [('mu', 'riyH', 'PFX[m] V/3 '), ('mu', 'ri#H', 'PFX[m] C/3 ')]
 
+def test_mlsq():
+    def f(x):
+        return [2*x+1,2*x]
+    yield assert_equal, baam.mlsq(f,[0,3,7]), [0, 1, 6, 7 ,14, 15]
+    
+def test_parse():
+    yield assert_equal, baam.parse(('p','s','c')), ('p','s','c')
+
+def test_parse_list():
+    yield assert_equal, baam.parse_list([('pa','sa','ca'),('pb','sb', 'cb')]), [('pa','sa','ca'),('pb','sb','cb')] 
+    
 def test_parse_prefix():
     yield assert_equal, baam.parse_prefix(('muriyH','')), [('', 'muriyH', ''), ('mu', 'riyH', 'PFX[m] ')]
 
@@ -30,10 +43,15 @@ def test_two_consonant_expand():
     yield assert_equal, baam.two_consonant_expand([('','>us~','')]), [('', '>us~', ''), ('', '>ius~', 'CC[i] '), ('', '>yus~', 'CC[y] '), ('', '>uss~', 'CC2 ')]
     yield assert_equal, baam.two_consonant_expand([('','>us~',''), ('','>ud~','')]), [('', '>us~', ''), ('', '>ius~', 'CC[i] '), ('', '>yus~', 'CC[y] '), ('', '>uss~', 'CC2 '), ('', '>ud~', ''), ('', '>iud~', 'CC[i] '), ('', '>yud~', 'CC[y] '), ('', '>udd~', 'CC2 ')]
 
+def test_meta_expand_list():
+    yield assert_equal, baam.meta_expand_list([('','DAfiy','')]), [('', 'D%fi#',  'C/5 '), ('' ,'D%fiy', 'V/5 ')]
+
 def test_meta_expand():
-    yield assert_equal, baam.meta_expand([('','DAfiy','')]), set([('', 'D%fiy',  'V/5 '), ('' ,'D%fi#', 'C/5 ')])
-    
-def test_dictionary_sets():
+    yield assert_equal, baam.meta_expand(('','DAfiy','')), [('', 'D%fi#',  'C/5 '), ('' ,'D%fiy', 'V/5 ')]
+
+
+    '''    
+    def test_dictionary_sets():
     #Create parsed dictionary
     parsed_dictionary = baam.make_parse_dictionary()
     #Create frequency dictionaries for stems, roots and patterns
@@ -42,4 +60,5 @@ def test_dictionary_sets():
     pattern_dictionary = baam.make_BANARM_dictionary('pattern_token')
     answer = baam.dictionary_sets(stem_dictionary, parsed_dictionary)
     yield assert_equal, answer['commentary'], 'There are 33651 stems in the dictionary\nThere are 38270 stems in the corpus\nThere are 18795 stems unique to the dictionary\nThere are 23414 stems unique to the corpus\nThere are 14856 stems common to both corpus and dictionary\n' 
+'''
 
