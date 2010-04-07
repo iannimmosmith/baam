@@ -1,4 +1,9 @@
-''' Testing BANARM module '''
+'''
+Testing BANARM module
+Author: Ian Nimmo-Smith
+Description: Python library for Bayesian ANalysis of ARabic Morphology (BANARM)
+Date: 07 Apr 2010
+'''
 
 import numpy as np
 
@@ -8,10 +13,16 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 import BANARM as baam
 
-def test_map_lists():
-    def f(x):
-        return [2*x+1,2*x]
-    yield assert_equal, baam.map_lists(f,[0,3,7]), [15, 14, 1, 0, 7, 6]
+#def test_map_lists():
+#    def f(x):
+#        return [2*x+1,2*x]
+#    yield assert_equal, baam.map_lists(f,[0,3,7]), [15, 14, 1, 0, 7, 6]
+    
+def test_map_lists_args():
+    def f(x,y):
+        return [(2*x+1,y),(2*x,y)]
+    #print  baam.map_lists_args(f,([0,3,7],10))
+    yield assert_equal, baam.map_lists_args(f,([0,3,7],10)), [(6, 10), (7, 10), (14, 10), (15, 10), (1, 10), (0, 10)]
     
 def test_uniquify():
     yield assert_equal, baam.uniquify([('mu', 'riyH', 'PFX[m] '), ('mu', 'riyH', 'PFX[m] V/3 '), ('mu', 'riyH', 'PFX[m] V/3 ')]), [('mu', 'riyH', 'PFX[m] '), ('mu', 'riyH', 'PFX[m] V/3 ')]
@@ -19,8 +30,10 @@ def test_uniquify():
 def test_analyst():
     yield assert_equal, len(baam.analyst(('mu', 'riyH', 'PFX[m] '))), 1
     #[('mu', 'ryH', 'fiEl', 'PFX[m] C/3 3R ')]
-    yield assert_equal, len(baam.analyst(('','DAfiy',''))), 14
-    #[('', 'Dfy', 'fAEil', 'C/5 3R '), ('', 'DAy', 'fEfil', 'C/5 3R '), ('', 'DfY', 'fAEil', 'C/5 3R RootEnd[wyY] '), ('', 'DAfw', 'fElil', 'C/5 4R RootEnd[wyY] '), ('', 'DAf', 'fEliy', 'C/5 3R '), ('', 'DAfY', 'fElil', 'C/5 4R RootEnd[wyY] '), ('', 'Afy', 'DfEil', 'C/5 3R '), ('', 'DAY', 'fEfil', 'C/5 3R RootEnd[wyY] '), ('', 'DAf', 'fEliy', 'V/5 3R '), ('', 'DAfy', 'fElil', 'C/5 4R '), ('', 'AfY', 'DfEil', 'C/5 3R RootEnd[wyY] '), ('', 'DAw', 'fEfil', 'C/5 3R RootEnd[wyY] '), ('', 'Afw', 'DfEil', 'C/5 3R RootEnd[wyY] '), ('', 'Dfw', 'fAEil', 'C/5 3R RootEnd[wyY] ')]
+    #print baam.analyst(('','DAfiy',''))
+    #print baam.analyst(('','raD~',''))
+    yield assert_equal, len(baam.analyst(('','DAfiy',''))), 45
+    #[('', 'D&f', 'fEliy', 'C/5 3R GlotMedRoot '), ('', "D'f", 'fEliY', 'V/5 3R PattEnd[wyY] GlotMedRoot '), ('', "D'Y", 'fEfil', 'C/5 3R RootEnd[wyY] GlotMedRoot '), ('', 'D>f', 'fEliw', 'V/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAf', 'fEliy', 'C/5 3R '), ('', 'DAf', 'fEliY', 'V/5 3R PattEnd[wyY] '), ('', 'D>f', 'fEliy', 'V/5 3R GlotMedRoot '), ('', 'D>f', 'fEliw', 'C/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAY', 'fEfil', 'C/5 3R RootEnd[wyY] '), ('', 'D>Y', 'fEfil', 'C/5 3R RootEnd[wyY] GlotMedRoot '), ('', 'D&f', 'fEliY', 'V/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAf', 'fEliY', 'C/5 3R PattEnd[wyY] '), ('', 'Dfy', 'fAEil', 'C/5 3R '), ('', 'D&w', 'fEfil', 'C/5 3R RootEnd[wyY] GlotMedRoot '), ('', 'D&y', 'fEfil', 'C/5 3R GlotMedRoot '), ('', 'D>f', 'fEliY', 'V/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAf', 'fEliw', 'V/5 3R PattEnd[wyY] '), ('', 'D&f', 'fEliy', 'V/5 3R GlotMedRoot '), ('', 'Afw', 'DfEil', 'C/5 3R RootEnd[wyY] '), ('', 'D&f', 'fEliw', 'V/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAy', 'fEfil', 'C/5 3R '), ('', 'DfY', 'fAEil', 'C/5 3R RootEnd[wyY] '), ('', 'Dfw', 'fAEil', 'C/5 3R RootEnd[wyY] '), ('', "D'f", 'fEliY', 'C/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAfY', 'fElil', 'C/5 4R RootEnd[wyY] '), ('', 'D&f', 'fEliw', 'C/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAf', 'fEliy', 'V/5 3R '), ('', 'D>f', 'fEliY', 'C/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAw', 'fEfil', 'C/5 3R RootEnd[wyY] '), ('', 'D>f', 'fEliy', 'C/5 3R GlotMedRoot '), ('', "D'w", 'fEfil', 'C/5 3R RootEnd[wyY] GlotMedRoot '), ('', "D'f", 'fEliw', 'V/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAf', 'fEliw', 'C/5 3R PattEnd[wyY] '), ('', "D'f", 'fEliy', 'C/5 3R GlotMedRoot '), ('', "D'y", 'fEfil', 'C/5 3R GlotMedRoot '), ('', 'D>w', 'fEfil', 'C/5 3R RootEnd[wyY] GlotMedRoot '), ('', 'Afy', 'DfEil', 'C/5 3R '), ('', "D'f", 'fEliy', 'V/5 3R GlotMedRoot '), ('', 'AfY', 'DfEil', 'C/5 3R RootEnd[wyY] '), ('', "D'f", 'fEliw', 'C/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAfy', 'fElil', 'C/5 4R '), ('', 'DAfw', 'fElil', 'C/5 4R RootEnd[wyY] '), ('', 'D&Y', 'fEfil', 'C/5 3R RootEnd[wyY] GlotMedRoot '), ('', 'D&f', 'fEliY', 'C/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'D>y', 'fEfil', 'C/5 3R GlotMedRoot ')]
 
 def test_parse_list():
     yield assert_equal, baam.parse_list([('pa','sa','ca'),('pb','sb', 'cb')]), [('pa','sa','ca'),('pb','sb','cb')] 
@@ -33,7 +46,8 @@ def test_substitute_initial():
     yield assert_equal, baam.substitute_initial([('','>us~','')]), [('', '>us~', ''), ('', 'Aus~', 'IN '), ('', "'us~", 'IN '), ('', '<us~', 'IN '), ('', '{us~', 'IN ')]
 
 def test_geminate_tildes():
-    yield assert_equal, baam.geminate_tildes([('','>us~','')]),[('', '>us~', ''), ('', '>uss', 'GM/3 ')]
+    #print baam.geminate_tildes(('','>us~',''))
+    yield assert_equal, baam.geminate_tildes(('','>us~','')),[('', '>us~', ''), ('', '>usas', 'GM/4 ')]
 
 
 def test_find_tilde_locations():
