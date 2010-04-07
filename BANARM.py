@@ -27,9 +27,108 @@ def parse_list(prefix_stem_code_list):
     return [parse(outer) for outer in prefix_stem_code_list]
 
 def parse(p_s_c):
-    (p,s,c)=p_s_c
-    return (p,s,c)    
+    return p_s_c    
 
+def gen_comb(p_s_c):
+    lis = []
+    (prefix,stem,raw_code)=p_s_c
+    places=find_nonvowel_locations(stem)
+    if len(places) >= 3:
+        code = raw_code
+        if '3R' not in code:
+            code+='3R '
+        for root in generate_combinations(places,3):
+            try_pattern=list(consonant_meta(stem))
+            try_root=string.join([try_pattern[x] for x in root],'')
+            for x in range(3):
+                try_pattern[root[x]]=slot_names3[x]
+            try_pattern=string.join(try_pattern,'')
+            lis += [(prefix, try_root, try_pattern, code)]
+####            if try_pattern[-1] in 'oN':
+####                parts.add((try_root,try_pattern[:-1],code+'PattTrunc[oN.]'))
+##            if try_root[-1] in 'wyY':
+##                for char in 'wyY':
+##                    if try_root[-1] != char:
+##                        parts.add((try_root[:-1]+char,try_pattern,code+'RootEnd[wyY] '))
+##            parts.add((try_root,try_pattern,code))
+##            if try_pattern[-1] in 'wyY':
+##                for char in 'wyY':
+##                    if try_pattern[-1] != char:
+##                        parts.add((try_root,try_pattern[:-1]+char,code+'PattEnd[wyY] '))
+##            if try_pattern[-1] in "&'}":
+##                for char in "&'}":
+##                    parts.add((try_root,try_pattern[:-1]+char,code+'PattEnd[&] '))
+####            if try_pattern[:2] in ["{i", "<i"]:
+####                for first_two  in ["{i", "<i"]:
+####                    if first_two != try_pattern[:2]:
+####                        parts.add((try_root,first_two+try_pattern[2:],code+'PattInit[{i |<i] '))
+##            if try_pattern[0] in initials:
+##                for first in initials:
+##                    if first != try_pattern[0]:
+##                        parts.add((try_root,first+try_pattern[1:],code+'PattInitGlot '))
+##            if try_root[1] in glottal_medial_root:
+##                for char in glottal_medial_root:
+##                    if try_root[1] != char:
+##                        parts.add((try_root[0]+char+try_root[2],try_pattern,code+'RootMedGlot '))             
+##            if try_root[2] in glottal_final_root:
+##                for char in glottal_final_root:
+##                    if try_root[1] != char:
+##                        parts.add((try_root[:2]+char,try_pattern,code+'RootFinGlot '))             
+    if len(places) >= 4:
+        code = raw_code
+        if '4R' not in code:
+            code+='4R '
+        for root in generate_combinations(places,4):
+            try_pattern=list(consonant_meta(stem))
+            try_root=string.join([try_pattern[x] for x in root],'')
+            for x in range(4):
+                try_pattern[root[x]]=slot_names4[x]
+            try_pattern=string.join(try_pattern,'')
+            lis += [(prefix, try_root, try_pattern, code)]
+####            if try_pattern[-1] in 'oN':
+####                parts.add((try_root,try_pattern[:-1],code+'FP-'+try_pattern[-1]+' '))
+####            else:
+##            parts.add((try_root,try_pattern,code))
+##            if try_pattern[-1] in "yY":
+##                for char in "yY":
+##                    if try_pattern[1] != char:
+##                        parts.add((try_root,try_pattern[:-1]+char,code+'PattEnd[y|Y] '))
+##            if try_pattern[-1] in "&'}":
+##                for char in "&'}":
+##                    if try_pattern[1] != char:
+##                        parts.add((try_root,try_pattern[:-1]+char,code+"PattEnd[&'}] "))
+####            if try_pattern[:2] in ['{i', '<i']:
+####                for first_two  in ['{i', '<i']:
+####                    if first_two != try_pattern[:2]:
+####                        parts.add((try_root,first_two+try_pattern[2:],code+'PattEnd[{i |<i] '))
+##            if try_pattern[0] in initials:
+##                for first in initials:
+##                    if first != try_pattern[0]:
+##                        parts.add((try_root,first+try_pattern[1:],code+'PattInitGlot '))
+    return lis
+
+def generate_combinations(items, n):
+    '''
+    Combine sets of size n from items
+    Perhaps this should go in a combinatorics utility module?
+    '''
+    if n == 0:
+        yield []
+    else:
+        for i in xrange(len(items)):
+            for cc in generate_combinations(items[i+1:], n-1):
+                yield [items[i]] + cc
+
+
+def root_end_wyY(prefix_root_pattern_code):
+    result  = [prefix_root_pattern_code]
+    prefix, root, pattern, code =  prefix_root_pattern_code
+    if root[-1] in 'wyY':
+        for char in 'wyY':
+            if root[-1] != char:
+                result += [(prefix, root[:-1]+char,pattern,code+'RootEnd[wyY] ')]
+    return result
+                
 ##def parse(stem,code):
 ##    raw_code=code
 ##    parts = set([])
@@ -135,26 +234,39 @@ def parse(p_s_c):
 def analyst(prefix_stem_code):
     psc_c = two_consonant_expand([prefix_stem_code])
     #psc_m = sum(map(meta_expand, psc_c),[])
-    psc_m = mlsq(meta_expand, psc_c)
-    psc_p = mlsq(parse,psc_m)
-    return psc_p
+    psc_m = map_lists(meta_expand, psc_c)
+    psc_p = map_elements(parse,psc_m)
+    prpc = map_lists(gen_comb,psc_p)
+    rpc1 = map_lists(root_end_wyY,prpc)
+    return rpc1
 
-def mlsq(fun,lis):
-    # fun is a function
+def map_lists(fun,lis):
+    # fun is a function which returns lists
     # lis is a list
 
     #function to flatten and uniquify
     #the application of a function to a list
-    #It is assumed that fun returns a list of results
-    return list(set(sum([[apply(fun,[el]) for el in lis]],[])))
+    #It is assumed that fun returns lists
+    #return list(set(sum([[apply(fun,[el]) for el in lis]],[])))
+    return uniquify(sum([m for m in sum([[apply(fun, [el]) for el in lis]], [])], []))
+    #uniquify(sum([[apply(fun,[el]) for el in lis]],[]))
 
+def map_elements(fun,lis):
+    # fun is a function which returns values
+    # lis is a list
 
-def f3(seq):
-    # Not order preserving
-    keys = {}
-    for e in seq:
-        keys[e] = 1
-    return keys.keys()
+    #function to flatten and uniquify
+    #the application of a function to a list
+    #It is assumed that fun returns the vaalues we want to uniquely listify
+    #return list(set(sum([[apply(fun,[el]) for el in lis]],[])))
+    return uniquify(sum([[apply(fun, [el]) for el in lis]], []))
+    #uniquify(sum([[apply(fun,[el]) for el in lis]],[]))
+
+def uniquify(lis):
+    dic = {}
+    for el in lis:
+        dic[str(el)] = 1
+    return [eval(k) for k in dic.keys()]
 
 def parse_prefix(stem_code):
     '''
@@ -280,6 +392,10 @@ def find_root_locations(stem):
     """List places where stem has potential root""" 
     return [x for x in range(len(stem)) if stem[x] not in 'aeiou~']
     
+def find_nonvowel_locations(stem):
+    """List places where stem has non-vowels""" 
+    return [x for x in range(len(stem)) if stem[x] not in 'aeiou~Awy']
+
 def meta_expand(prefix_stem_code):
     '''
     >>>  print(BANARM.meta_expand([('','DAfiy','')]))
@@ -323,6 +439,13 @@ def meta_expand(prefix_stem_code):
                           code+gcode+hcode+' '))
         '''
     return list(expanded)
+
+def consonant_meta(stem):
+    """Intermediate meta-characters [] are replaced by [@#=]"""
+    stem = stem.replace('%','A')
+    stem = stem.replace('#','y')
+    stem = stem.replace('=','w')
+    return stem
 
 def meta_expand_list(psc_list):
     return sum([meta_expand(outer) for outer in psc_list],[])
