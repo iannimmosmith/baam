@@ -17,8 +17,10 @@ def test_uniquify():
     yield assert_equal, baam.uniquify([('mu', 'riyH', 'PFX[m] '), ('mu', 'riyH', 'PFX[m] V/3 '), ('mu', 'riyH', 'PFX[m] V/3 ')]), [('mu', 'riyH', 'PFX[m] '), ('mu', 'riyH', 'PFX[m] V/3 ')]
 
 def test_analyst():
-    yield assert_equal, baam.analyst(('mu', 'riyH', 'PFX[m] ')), [('mu', 'ryH', 'fiEl', 'PFX[m] C/3 3R ')]
-    yield assert_equal, baam.analyst(('','DAfiy','')), [('', 'Dfy', 'fAEil', 'C/5 3R '), ('', 'DAy', 'fEfil', 'C/5 3R '), ('', 'DfY', 'fAEil', 'C/5 3R RootEnd[wyY] '), ('', 'DAfw', 'fElil', 'C/5 4R RootEnd[wyY] '), ('', 'DAf', 'fEliy', 'C/5 3R '), ('', 'DAfY', 'fElil', 'C/5 4R RootEnd[wyY] '), ('', 'Afy', 'DfEil', 'C/5 3R '), ('', 'DAY', 'fEfil', 'C/5 3R RootEnd[wyY] '), ('', 'DAf', 'fEliy', 'V/5 3R '), ('', 'DAfy', 'fElil', 'C/5 4R '), ('', 'AfY', 'DfEil', 'C/5 3R RootEnd[wyY] '), ('', 'DAw', 'fEfil', 'C/5 3R RootEnd[wyY] '), ('', 'Afw', 'DfEil', 'C/5 3R RootEnd[wyY] '), ('', 'Dfw', 'fAEil', 'C/5 3R RootEnd[wyY] ')]
+    yield assert_equal, len(baam.analyst(('mu', 'riyH', 'PFX[m] '))), 1
+    #[('mu', 'ryH', 'fiEl', 'PFX[m] C/3 3R ')]
+    yield assert_equal, len(baam.analyst(('','DAfiy',''))), 14
+    #[('', 'Dfy', 'fAEil', 'C/5 3R '), ('', 'DAy', 'fEfil', 'C/5 3R '), ('', 'DfY', 'fAEil', 'C/5 3R RootEnd[wyY] '), ('', 'DAfw', 'fElil', 'C/5 4R RootEnd[wyY] '), ('', 'DAf', 'fEliy', 'C/5 3R '), ('', 'DAfY', 'fElil', 'C/5 4R RootEnd[wyY] '), ('', 'Afy', 'DfEil', 'C/5 3R '), ('', 'DAY', 'fEfil', 'C/5 3R RootEnd[wyY] '), ('', 'DAf', 'fEliy', 'V/5 3R '), ('', 'DAfy', 'fElil', 'C/5 4R '), ('', 'AfY', 'DfEil', 'C/5 3R RootEnd[wyY] '), ('', 'DAw', 'fEfil', 'C/5 3R RootEnd[wyY] '), ('', 'Afw', 'DfEil', 'C/5 3R RootEnd[wyY] '), ('', 'Dfw', 'fAEil', 'C/5 3R RootEnd[wyY] ')]
 
 def test_parse_list():
     yield assert_equal, baam.parse_list([('pa','sa','ca'),('pb','sb', 'cb')]), [('pa','sa','ca'),('pb','sb','cb')] 

@@ -1,7 +1,7 @@
 '''
 Author: Ian Nimmo-Smith
 Description: Python library for Bayesian ANalysis of ARabic Morphology (BANARM)
-Date: 06 Apr 2010
+Date: 07 Apr 2010
 '''
 
 import readexcel as form
