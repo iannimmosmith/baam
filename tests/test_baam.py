@@ -66,6 +66,11 @@ def test_meta_expand_list():
 def test_meta_expand():
     yield assert_equal, baam.meta_expand(('','DAfiy','')), [('', 'D%fi#',  'C/5 '), ('' ,'D%fiy', 'V/5 ')]
 
+
+def test_cvc_root():
+    yield assert_equal, baam.cvc_root(('','*At', 'fEl', '')), [('', '*yt', 'faEal', 'Sub[A/(y,aEa)] '), ('', '*wt', 'faEal', 'Sub[A/(w,aEa)] ')]
+    
+    
 '''
 def test_dictionary_sets():
     #Create parsed dictionary

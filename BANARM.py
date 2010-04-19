@@ -1,7 +1,7 @@
 '''
 Author: Ian Nimmo-Smith
 Description: Python library for Bayesian ANalysis of ARabic Morphology (BANARM)
-Date: 07 Apr 2010
+Date: 19 Apr 2010
 '''
 
 import readexcel as form
@@ -114,7 +114,23 @@ def glottal_final_root(prefix_root_pattern_code):
                 result += [(prefix,root[:2]+char,pattern,code+'GlotFinRoot ')]
     return result
 
-#def 
+def cvc_root(prefix_root_pattern_code):
+    prefix, root, pattern, code = prefix_root_pattern_code
+    last=pattern.find('E')
+    cvc = []
+    if root[1] == 'A':
+        cvc += [(prefix, root[0]+"y"+root[2], pattern[:last]+"aEa"+pattern[last+1:], \
+                     code+'Sub[A/(y,aEa)] ')]
+        cvc += [(prefix, root[0]+"w"+root[2], pattern[:last]+"aEa"+pattern[last+1:], \
+                     code+'Sub[A/(w,aEa)] ')]
+    elif root[1] == 'w':
+        cvc += [(prefix, root, pattern[:last]+"uEu"+pattern[last+1:], \
+                     code+'Sub[w/(w,uEu)] ')]
+    elif root[1] == 'y':
+        cvc += [(prefix, root, pattern[:last]+"iEi"+pattern[last+1:], \
+                     code+'Sub[y/(y,iEi)] ')]
+    return cvc
+    
 
 ##    cvc = set([])
 ##    for (try_root,try_pattern,code) in parts:
@@ -173,16 +189,18 @@ def map_lists(fun,lis):
     return uniquify(sum([m for m in sum([[apply(fun, [el]) for el in lis]], [])], []))
     #uniquify(sum([[apply(fun,[el]) for el in lis]],[]))
 
-def map_lists_args(fun,tuple):
+def map_lists_args(fun,argtuple):
     # fun is a function which returns lists
-    # lis is a list
+    # argtuple is a tuple with first element a list
+    # for fun to be evaluated on with additional arguments
+    # from the subsequent elements of argtuple (if any)
 
     #function to flatten and uniquify
     #the application of a function to a list
     #It is assumed that fun returns lists
     #return list(set(sum([[apply(fun,[el]) for el in lis]],[])))
-    lis = tuple[0]
-    otherargs = tuple[1:]
+    lis = argtuple[0]
+    otherargs = argtuple[1:]
     lists=sum([m for m in sum([[fun(*((el,)+otherargs)) for el in lis]], [])], [])
     return uniquify(lists)
     #uniquify(sum([[apply(fun,[el]) for el in lis]],[]))
@@ -193,7 +211,7 @@ def map_elements(fun,lis):
 
     #function to flatten and uniquify
     #the application of a function to a list
-    #It is assumed that fun returns the vaalues we want to uniquely listify
+    #It is assumed that fun returns the values we want to uniquely listify
     #return list(set(sum([[apply(fun,[el]) for el in lis]],[])))
     return uniquify(sum([[apply(fun, [el]) for el in lis]], []))
     #uniquify(sum([[apply(fun,[el]) for el in lis]],[]))
