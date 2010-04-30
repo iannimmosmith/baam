@@ -31,6 +31,7 @@ def test_analyst():
     yield assert_equal, len(baam.analyst(('mu', 'riyH', 'PFX[m] '))), 1
     #[('mu', 'ryH', 'fiEl', 'PFX[m] C/3 3R ')]
     #print baam.analyst(('','DAfiy',''))
+    #print len(baam.analyst(('','DAfiy','')))
     #print baam.analyst(('','raD~',''))
     yield assert_equal, len(baam.analyst(('','DAfiy',''))), 45
     #[('', 'D&f', 'fEliy', 'C/5 3R GlotMedRoot '), ('', "D'f", 'fEliY', 'V/5 3R PattEnd[wyY] GlotMedRoot '), ('', "D'Y", 'fEfil', 'C/5 3R RootEnd[wyY] GlotMedRoot '), ('', 'D>f', 'fEliw', 'V/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAf', 'fEliy', 'C/5 3R '), ('', 'DAf', 'fEliY', 'V/5 3R PattEnd[wyY] '), ('', 'D>f', 'fEliy', 'V/5 3R GlotMedRoot '), ('', 'D>f', 'fEliw', 'C/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAY', 'fEfil', 'C/5 3R RootEnd[wyY] '), ('', 'D>Y', 'fEfil', 'C/5 3R RootEnd[wyY] GlotMedRoot '), ('', 'D&f', 'fEliY', 'V/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAf', 'fEliY', 'C/5 3R PattEnd[wyY] '), ('', 'Dfy', 'fAEil', 'C/5 3R '), ('', 'D&w', 'fEfil', 'C/5 3R RootEnd[wyY] GlotMedRoot '), ('', 'D&y', 'fEfil', 'C/5 3R GlotMedRoot '), ('', 'D>f', 'fEliY', 'V/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAf', 'fEliw', 'V/5 3R PattEnd[wyY] '), ('', 'D&f', 'fEliy', 'V/5 3R GlotMedRoot '), ('', 'Afw', 'DfEil', 'C/5 3R RootEnd[wyY] '), ('', 'D&f', 'fEliw', 'V/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAy', 'fEfil', 'C/5 3R '), ('', 'DfY', 'fAEil', 'C/5 3R RootEnd[wyY] '), ('', 'Dfw', 'fAEil', 'C/5 3R RootEnd[wyY] '), ('', "D'f", 'fEliY', 'C/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAfY', 'fElil', 'C/5 4R RootEnd[wyY] '), ('', 'D&f', 'fEliw', 'C/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAf', 'fEliy', 'V/5 3R '), ('', 'D>f', 'fEliY', 'C/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAw', 'fEfil', 'C/5 3R RootEnd[wyY] '), ('', 'D>f', 'fEliy', 'C/5 3R GlotMedRoot '), ('', "D'w", 'fEfil', 'C/5 3R RootEnd[wyY] GlotMedRoot '), ('', "D'f", 'fEliw', 'V/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAf', 'fEliw', 'C/5 3R PattEnd[wyY] '), ('', "D'f", 'fEliy', 'C/5 3R GlotMedRoot '), ('', "D'y", 'fEfil', 'C/5 3R GlotMedRoot '), ('', 'D>w', 'fEfil', 'C/5 3R RootEnd[wyY] GlotMedRoot '), ('', 'Afy', 'DfEil', 'C/5 3R '), ('', "D'f", 'fEliy', 'V/5 3R GlotMedRoot '), ('', 'AfY', 'DfEil', 'C/5 3R RootEnd[wyY] '), ('', "D'f", 'fEliw', 'C/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'DAfy', 'fElil', 'C/5 4R '), ('', 'DAfw', 'fElil', 'C/5 4R RootEnd[wyY] '), ('', 'D&Y', 'fEfil', 'C/5 3R RootEnd[wyY] GlotMedRoot '), ('', 'D&f', 'fEliY', 'C/5 3R PattEnd[wyY] GlotMedRoot '), ('', 'D>y', 'fEfil', 'C/5 3R GlotMedRoot ')]
@@ -68,7 +69,8 @@ def test_meta_expand():
 
 
 def test_cvc_root():
-    yield assert_equal, baam.cvc_root(('','*At', 'fEl', '')), [('', '*yt', 'faEal', 'Sub[A/(y,aEa)] '), ('', '*wt', 'faEal', 'Sub[A/(w,aEa)] ')]
+    #print baam.cvc_root(('','*At', 'fEl', ''))
+    yield assert_equal, baam.cvc_root(('','*At', 'fEl', '')),  [('', '*At', 'fEl', ''), ('', '*yt', 'faEal', 'Sub[A/(y,aEa)] '), ('', '*wt', 'faEal', 'Sub[A/(w,aEa)] ')]
     
     
 '''

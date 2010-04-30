@@ -1,7 +1,7 @@
 '''
 Author: Ian Nimmo-Smith
 Description: Python library for Bayesian ANalysis of ARabic Morphology (BANARM)
-Date: 19 Apr 2010
+Date: 28 Apr 2010
 '''
 
 import readexcel as form
@@ -117,7 +117,7 @@ def glottal_final_root(prefix_root_pattern_code):
 def cvc_root(prefix_root_pattern_code):
     prefix, root, pattern, code = prefix_root_pattern_code
     last=pattern.find('E')
-    cvc = []
+    cvc = [prefix_root_pattern_code]
     if root[1] == 'A':
         cvc += [(prefix, root[0]+"y"+root[2], pattern[:last]+"aEa"+pattern[last+1:], \
                      code+'Sub[A/(y,aEa)] ')]
@@ -132,21 +132,6 @@ def cvc_root(prefix_root_pattern_code):
     return cvc
     
 
-##    cvc = set([])
-##    for (try_root,try_pattern,code) in parts:
-##        last=try_pattern.find('E')
-##        if try_root[1] == 'A':
-##            cvc.add((try_root[0]+"y"+try_root[2],try_pattern[:last]+"aEa"+
-##                try_pattern[last+1:],code+'Sub[A/(y,aEa)] '))
-##            cvc.add((try_root[0]+"w"+try_root[2],try_pattern[:last]+"aEa"+
-##                try_pattern[last+1:],code+'Sub[A/(w,aEa)] '))
-##        if try_root[1] == 'w':
-##            cvc.add((try_root[0]+"w"+try_root[2],try_pattern[:last]+"uEu"+
-##                try_pattern[last+1:],code+'Sub[w/(w,uEu)] '))
-##        if try_root[1] == 'y':
-##            cvc.add((try_root[0]+"y"+try_root[2],try_pattern[:last]+"iEi"+
-##                try_pattern[last+1:],code+'Sub[y/(y,iEi)] '))
-##    parts.update(cvc)
 ####    oddsandends = set([])
 ####    for (root,pattern) in parts:
 ####        if root[2] in "Yyw":
@@ -169,6 +154,7 @@ def analyst(prefix_stem_code):
     psc = map_elements(parse,psc)
     prpc = map_lists(gen_comb,psc)
     #prpc1 = map_lists(root_end_wyY,prpc)
+    #prpc = map_lists(cvc_root,prpc)
     prpc = map_lists_args(root_end, (prpc,'wyY', 'RootEnd[wyY]'))
     prpc = map_lists_args(pattern_end, (prpc,'wyY','PattEnd[wyY]'))
     prpc = map_lists_args(pattern_end, (prpc, "&'}","PattEnd[&'}]"))
@@ -466,7 +452,7 @@ def make_BANARM_dictionary(source):
     Create a BANARM dictionary for a named tab ('source') in the
     spreadsheet 'root-pattern-frequencies.xls'.
 
-    Requires module form
+    Requires module 'form'
     
     Parameter:
     ---------------
@@ -492,9 +478,9 @@ def dictionary_sets(stems,dictionary,report=True):
     '''Report statistics for relationship between corpus and dictionary'''
     dictionary_stems = set(dictionary.keys())
     corpus_stems = set(stems.keys())
-    unique_dictionary_stems = dictionary_stems.difference(corpus_stems)
-    unique_corpus_stems = corpus_stems.difference(dictionary_stems)
-    common_stems = dictionary_stems.intersection(corpus_stems)
+    unique_dictionary_stems = list(dictionary_stems.difference(corpus_stems))
+    unique_corpus_stems = list(corpus_stems.difference(dictionary_stems))
+    common_stems = list(dictionary_stems.intersection(corpus_stems))
     commentary = ''
     commentary +=  "There are %d stems in the dictionary\n" % (len(dictionary_stems))
     commentary += "There are %d stems in the corpus\n" % (len(corpus_stems))
@@ -505,7 +491,7 @@ def dictionary_sets(stems,dictionary,report=True):
     return {'commentary': commentary, 'stems': dictionary_stems,
             'corpus': corpus_stems, 'common': common_stems}
 
-#analyst(('mu', 'riyH', 'PFX[m] '))
+#print analyst(('mu', 'riyH', 'PFX[m] '))
 
 ##    expanded_stem_code_list = two_consonant_expand(stem,code)
 ##    parts = set([])
@@ -514,13 +500,68 @@ def dictionary_sets(stems,dictionary,report=True):
 ##            parts.update(parse(meta_expanded_stem,code))
 ##    return parts
 
-##'''Create parsed dictionary'''
-##parsed_dictionary = make_parse_dictionary()
-##
-##'''Create frequency dictionaries for stems, roots and patterns'''
-##stem_dictionary = make_baam_dictionary('stem_pointed_token')
-##root_dictionary = make_baam_dictionary('root_token')
-##pattern_dictionary = make_baam_dictionary('pattern_token')
+def count(dic,entry):
+    if entry in dic:
+        return int(dic[entry])
+    else:
+        return 0
+
+def gather(prpc_list):
+    gathered = {}
+    for prpc in prpc_list:
+        prefix, root, pattern, code = prpc
+        parsing = (root, prefix+pattern)
+        if parsing in gathered:
+            gathered[parsing].append(code)
+        else:
+            gathered[parsing] = [code]
+    return gathered
+
+'''Create parsed dictionary'''
+parsed_dictionary = make_parse_dictionary()
+#print len(parsed_dictionary), 'parsed in dictionary'
+
+'''Create frequency dictionaries for stems, roots and patterns'''
+stem_dictionary = make_BANARM_dictionary('stem_pointed_token')
+#print len(stem_dictionary), 'corpus stems'
+root_dictionary = make_BANARM_dictionary('root_token')
+#print len(root_dictionary), 'corpus roots'
+pattern_dictionary = make_BANARM_dictionary('pattern_token')
+#print len(pattern_dictionary), 'corpus patterns'
+#print 'making dictionary sets ...'
+dic_sets = dictionary_sets(stem_dictionary, parsed_dictionary, True)
+print dic_sets['commentary']
+
+test_cases =  [dic_sets['common'][i] for i in [1000,2000,3000]]
+
+def evaluate(stem):
+    options = analyst(('',stem,''))
+    g_options = gather(options)
+    solutions = []
+    valid = 0
+    invalid = 0
+    for rp in g_options.keys():
+        #print prsc
+        codes =  g_options[rp]
+        root, pattern = rp
+        root_count = count(root_dictionary, root)
+        pattern_count = count(pattern_dictionary, pattern)
+        if root_count * pattern_count > 0:
+            solutions += (stem, (root, pattern), root, root_count, pattern, pattern_count, codes)
+            valid += 1
+        else:
+            invalid += 1
+    if stem in parsed_dictionary:
+        dic_sol = parsed_dictionary[stem]
+    else:
+        dic_sol = None
+    return {'stem': stem, 'solutions': solutions, 'valid': valid, 'invalid': invalid, 'dictionary': dic_sol}
+
+for stem in test_cases:
+    print evaluate(stem)
+
+#print root, count(root_dictionary,root), pattern, count(pattern_dictionary,pattern)    
+
 ##
 ##def print_entry(file, stem, prefix_body_root_pattern_code_list):
 ##    for (prefix,body,root,rootcount,pattern,patterncount,comment,code) in prefix_body_root_pattern_code_list:
