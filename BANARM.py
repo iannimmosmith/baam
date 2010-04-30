@@ -557,8 +557,14 @@ def evaluate(stem):
         dic_sol = None
     return {'stem': stem, 'solutions': solutions, 'valid': valid, 'invalid': invalid, 'dictionary': dic_sol}
 
+solutions={}
+solfile = open('solutions','wb')
 for stem in test_cases:
-    print evaluate(stem)
+    solutions[stem]=evaluate(stem)
+cPickle.dump(solutions,solfile)
+print solutions
+
+
 
 #print root, count(root_dictionary,root), pattern, count(pattern_dictionary,pattern)    
 
