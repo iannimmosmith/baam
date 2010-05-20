@@ -1,7 +1,7 @@
 '''
 Author: Ian Nimmo-Smith
 Description: Python library for Bayesian ANalysis of ARabic Morphology (BANARM)
-Date: 28 Apr 2010
+Date: 04 May 2010
 '''
 
 import readexcel as form
@@ -146,24 +146,6 @@ def cvc_root(prefix_root_pattern_code):
 ####    parts.update(oddsandends)
 ##    return parts
 
-def analyst(prefix_stem_code):
-    psc = two_consonant_expand([prefix_stem_code])
-    #psc_m = sum(map(meta_expand, psc_c),[])
-    psc = map_lists(geminate_tildes, psc)
-    psc = map_lists(meta_expand, psc)
-    psc = map_elements(parse,psc)
-    prpc = map_lists(gen_comb,psc)
-    #prpc1 = map_lists(root_end_wyY,prpc)
-    #prpc = map_lists(cvc_root,prpc)
-    prpc = map_lists_args(root_end, (prpc,'wyY', 'RootEnd[wyY]'))
-    prpc = map_lists_args(pattern_end, (prpc,'wyY','PattEnd[wyY]'))
-    prpc = map_lists_args(pattern_end, (prpc, "&'}","PattEnd[&'}]"))
-    prpc = map_lists_args(pattern_start, (prpc,))
-    prpc = map_lists_args(glottal_medial_root, (prpc,))
-    prpc = map_lists_args(glottal_final_root, (prpc,))
-    return prpc
-
-
 def map_lists(fun,lis):
     # fun is a function which returns lists
     # lis is a list
@@ -207,6 +189,12 @@ def uniquify(lis):
     for el in lis:
         dic[str(el)] = 1
     return [eval(k) for k in dic.keys()]
+
+def unique_strings(lis):
+    dic = {}
+    for el in lis:
+        dic[el] = 1
+    return [k for k in dic.keys()]
 
 def parse_prefix(stem_code):
     '''
@@ -443,7 +431,7 @@ def make_parse_dictionary():
     point=0
     for (point, entry) in enumerate(entries):
         if pattern[point] not in nonwordtypes:
-            dictionarydic[entry]=(root[point],pattern[point])
+            dictionarydic[entry]=(root[point].encode(),pattern[point].encode())
     return dictionarydic
 
 
@@ -463,6 +451,8 @@ def make_BANARM_dictionary(source):
     databook=form.loadexcel(baam_databook)
     source_sheet = databook.sheet_by_name(source)
     source_names = source_sheet.col_values(0)
+    for (n, name) in enumerate(source_names):
+        source_names[n] = name.encode()
     source_tokens = source_sheet.col_values(1)
     source_no = source_sheet.nrows
     return make_dictionary(source_names,source_tokens)
@@ -474,7 +464,7 @@ def make_dictionary(names,tokens):
         dic[name] = tokens[point]
     return dic
 
-def dictionary_sets(stems,dictionary,report=True):
+def dictionary_sets(stems,dictionary,report=True,save=False):
     '''Report statistics for relationship between corpus and dictionary'''
     dictionary_stems = set(dictionary.keys())
     corpus_stems = set(stems.keys())
@@ -487,9 +477,14 @@ def dictionary_sets(stems,dictionary,report=True):
     commentary += "There are %d stems unique to the dictionary\n" % (len(unique_dictionary_stems))
     commentary += "There are %d stems unique to the corpus\n" % (len(unique_corpus_stems))
     commentary += "There are %d stems common to both corpus and dictionary\n"%(len(common_stems))
-    #print commentary
-    return {'commentary': commentary, 'stems': dictionary_stems,
+    if report:
+        print commentary
+    stem_sets = {'commentary': commentary, 'stems': dictionary_stems,
             'corpus': corpus_stems, 'common': common_stems}
+    if save:
+        stem_sets_file = open('stem_sets','wb')
+        cPickle.dump(stem_sets,stem_sets_file)
+    return stem_sets
 
 #print analyst(('mu', 'riyH', 'PFX[m] '))
 
@@ -517,27 +512,30 @@ def gather(prpc_list):
             gathered[parsing] = [code]
     return gathered
 
-'''Create parsed dictionary'''
-parsed_dictionary = make_parse_dictionary()
-#print len(parsed_dictionary), 'parsed in dictionary'
+def analyst(prefix_stem_code):
+    psc = two_consonant_expand([prefix_stem_code])
+    #psc_m = sum(map(meta_expand, psc_c),[])
+    psc = map_lists(geminate_tildes, psc)
+    psc = map_lists(meta_expand, psc)
+    psc = map_elements(parse,psc)
+    prpc = map_lists(gen_comb,psc)
+    #prpc1 = map_lists(root_end_wyY,prpc)
+    #prpc = map_lists(cvc_root,prpc)
+    prpc = map_lists_args(root_end, (prpc,'wyY', 'RootEnd[wyY]'))
+    prpc = map_lists_args(pattern_end, (prpc,'wyY','PattEnd[wyY]'))
+    prpc = map_lists_args(pattern_end, (prpc, "&'}","PattEnd[&'}]"))
+    prpc = map_lists_args(pattern_start, (prpc,))
+    prpc = map_lists_args(glottal_medial_root, (prpc,))
+    prpc = map_lists_args(glottal_final_root, (prpc,))
+    return prpc
 
-'''Create frequency dictionaries for stems, roots and patterns'''
-stem_dictionary = make_BANARM_dictionary('stem_pointed_token')
-#print len(stem_dictionary), 'corpus stems'
-root_dictionary = make_BANARM_dictionary('root_token')
-#print len(root_dictionary), 'corpus roots'
-pattern_dictionary = make_BANARM_dictionary('pattern_token')
-#print len(pattern_dictionary), 'corpus patterns'
-#print 'making dictionary sets ...'
-dic_sets = dictionary_sets(stem_dictionary, parsed_dictionary, True)
-print dic_sets['commentary']
-
-test_cases =  [dic_sets['common'][i] for i in [1000,2000,3000]]
-
-def evaluate(stem):
+def evaluate(stem,root_dictionary, pattern_dictionary, parsed_dictionary):
+    stem=stem.encode()
     options = analyst(('',stem,''))
     g_options = gather(options)
     solutions = []
+    roots = []
+    patterns = []
     valid = 0
     invalid = 0
     for rp in g_options.keys():
@@ -545,25 +543,134 @@ def evaluate(stem):
         codes =  g_options[rp]
         root, pattern = rp
         root_count = count(root_dictionary, root)
+        if root_count > 0:
+            roots.append((root, root_count))
         pattern_count = count(pattern_dictionary, pattern)
+        if pattern_count > 0:
+            patterns.append((pattern, pattern_count))
         if root_count * pattern_count > 0:
             solutions += (stem, (root, pattern), root, root_count, pattern, pattern_count, codes)
             valid += 1
         else:
             invalid += 1
+    #print roots
+    roots = unique_strings(roots)
+    #print patterns
+    patterns = unique_strings(patterns)
     if stem in parsed_dictionary:
         dic_sol = parsed_dictionary[stem]
     else:
         dic_sol = None
-    return {'stem': stem, 'solutions': solutions, 'valid': valid, 'invalid': invalid, 'dictionary': dic_sol}
+    return {'stem': stem, 'roots': roots, 'patterns': patterns,'solutions': solutions, 'valid': valid, 'invalid': invalid, 'dictionary': dic_sol}
 
-solutions={}
-solfile = open('solutions','wb')
-for stem in test_cases:
-    solutions[stem]=evaluate(stem)
-cPickle.dump(solutions,solfile)
-print solutions
 
+def create_solutions():
+    '''Create parsed dictionary'''
+    parsed_dictionary = make_parse_dictionary()
+    #print len(parsed_dictionary), 'parsed in dictionary'
+
+    '''Create frequency dictionaries for stems, roots and patterns'''
+    stem_dictionary = make_BANARM_dictionary('stem_pointed_token')
+    #print len(stem_dictionary), 'corpus stems'
+    root_dictionary = make_BANARM_dictionary('root_token')
+    #print len(root_dictionary), 'corpus roots'
+    pattern_dictionary = make_BANARM_dictionary('pattern_token')
+    #print len(pattern_dictionary), 'corpus patterns'
+    #print 'making dictionary sets ...'
+    dic_sets = dictionary_sets(stem_dictionary, parsed_dictionary, True)
+    print dic_sets['commentary']
+
+    #test_cases =  [dic_sets['common'][i] for i in [1000,2000,3000]]
+
+    solutions={}
+    solfile = open('fullsolutions','wb')
+    solcount = 0
+
+    for stem in stem_dictionary:
+        solcount += 1
+        if solcount % 1000 == 0:
+            print '... entry ',solcount
+        solutions[stem.encode()] = evaluate(stem, root_dictionary, pattern_dictionary, parsed_dictionary)
+
+    # this took 6 hours on devel06 on 30-Apr-2010
+    # next version took 6.5 h on 2 May 2010
+
+    cPickle.dump(solutions,solfile)
+    solfile.close()
+    return solutions
+
+def load_solutions():
+    print '... starting loading solutions ...'
+    solfile = open('fullsolutions','r')
+    solutions= cPickle.load(solfile)
+    print '... finishing loading ...'
+    return solutions
+
+def load_stem_sets():
+    print '... starting loading stem sets ...'
+    stem_sets_file = open('stem_sets','r')
+    stem_sets= cPickle.load(stem_sets_file)
+    print '... finishing loading ...'
+    return stem_sets
+
+def root_pattern_match(rp_a,rp_b):
+    r_a, p_a = rp_a
+    r_b, p_b = rp_b
+    if p_a[-1] in 'Na':
+        p_a = p_a[:-1]
+    if p_b[-1] in 'Na':
+        p_b = p_b[:-1]
+    if p_a == p_b:
+        return True
+    else:
+        return False
+    
+        
+    
+
+if __name__ == '__main__':
+    make_dics = False
+    if make_dics:
+        '''Create parsed dictionary'''
+        parsed_dictionary = make_parse_dictionary()
+        '''Create frequency dictionaries for stems, roots and patterns'''
+        stem_dictionary = make_BANARM_dictionary('stem_pointed_token')
+        root_dictionary = make_BANARM_dictionary('root_token')
+        pattern_dictionary = make_BANARM_dictionary('pattern_token')
+        stem_sets = dictionary_sets(stem_dictionary, parsed_dictionary, report=True, save=True)
+    else:
+        stem_sets =  load_stem_sets()
+
+    common = stem_sets['common']
+
+    import time
+    starttime = time.time()
+    #solutions = create_solutions()
+    solutions = load_solutions()
+    none = 0
+    single = 0
+    multiple = 0
+    solved = 0
+    unsolved = open('unsolved','w')
+    invalid = open('invalid', 'w')
+    for stem in common:
+        s = solutions[stem]
+        if s['valid'] == 0:
+            print >> invalid, s['stem'], s['dictionary']
+            none += 1
+        elif s['valid'] == 1:
+            single +=1
+            if root_pattern_match(s['solutions'][1], s['dictionary']):
+                solved += 1
+            else:
+                print >> unsolved, s['stem'], s['solutions'][1], '!=', s['dictionary']
+        else:
+            multiple += 1
+    unsolved.close()
+    invalid.close()
+    print 'none %d, single %d, solved %d, multiple %d' % (none,single,solved,multiple) 
+    endtime = time.time()
+    print '... program took %d seconds ' % np.int(endtime-starttime)
 
 
 #print root, count(root_dictionary,root), pattern, count(pattern_dictionary,pattern)    
