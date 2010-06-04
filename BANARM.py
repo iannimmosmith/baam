@@ -625,14 +625,23 @@ def root_pattern_match(rp_a,rp_b):
     else:
         return False
 
-def maximum_frequency_root(solution, parsed_dictionary):
-    roots = solution['roots']
-    print roots
+def maximum_frequency_root(solution):
+    r_f = solution['roots']
+    if len(r_f) == 0:
+        return ('',0)
+    else:
+        return r_f[np.argmax([freq for (root,freq) in r_f])]
     
-
+def maximum_frequency_pattern(solution):
+    p_f = solution['patterns']
+    if len(p_f) == 0:
+        return ('',0)
+    else:
+        return p_f[np.argmax([freq for (pattern,freq) in p_f])]
+    
 if __name__ == '__main__':
 
-    make_dics = False
+    make_dics = True
 
     if make_dics:
         '''Create parsed dictionary'''
@@ -656,27 +665,76 @@ if __name__ == '__main__':
     none = 0
     single = 0
     multiple = 0
-    solved = 0
+    solvedcount = 0
+    unsolvedcount = 0
 
     unsolved = open('unsolved','w')
     invalid = open('invalid', 'w')
 
+    maxroot_hit = 0
+    maxroot_miss = 0
+
+    maxpattern_hit = 0
+    maxpattern_miss = 0
+
+    multmaxroot_hit = 0
+    multmaxroot_miss = 0
+
+    multmaxpattern_hit = 0
+    multmaxpattern_miss = 0
+
+    #for stem in [common[j] for j in range(401,10000,500)]:
     for stem in common:
+        dictionary_solution = parsed_dictionary[stem]
+        #print dictionary_solution
         s = solutions[stem]
+        #print maximum_frequency_root(s)
+        if dictionary_solution[0] == maximum_frequency_root(s)[0]:
+            maxroot_hit +=1
+        else:
+            maxroot_miss +=1
+        if dictionary_solution[1] == maximum_frequency_pattern(s)[0]:
+            maxpattern_hit +=1
+        else:
+            maxpattern_miss +=1
         if s['valid'] == 0:
             print >> invalid, s['stem'], s['dictionary']
             none += 1
         elif s['valid'] == 1:
             single +=1
             if root_pattern_match(s['solutions'][1], s['dictionary']):
-                solved += 1
+                solvedcount += 1
             else:
+                unsolvedcount += 1
                 print >> unsolved, s['stem'], s['solutions'][1], '!=', s['dictionary']
         else:
             multiple += 1
+            if dictionary_solution[0] == maximum_frequency_root(s)[0]:
+                multmaxroot_hit +=1
+            else:
+                multmaxroot_miss +=1
+            if dictionary_solution[1] == maximum_frequency_pattern(s)[0]:
+                multmaxpattern_hit +=1
+            else:
+                multmaxpattern_miss +=1
+            maxpattern_miss +=1
     unsolved.close()
     invalid.close()
-    print 'none %d, single %d, solved %d, multiple %d' % (none,single,solved,multiple) 
+    print 'none %d\n \
+           single %d\n \
+           solved %d\n \
+           unsolved %d\n \
+           multiple solutions %d\n \
+           maxroot_hits %d\n \
+           maxroot_miss %d\n \
+           maxpattern_hits %d\n \
+           maxpattern_miss %d\n \
+           multnmaxroot_hits %d\n \
+           multmaxroot_miss %d\n \
+           multmaxpattern_hits %d\n \
+           multmaxpattern_miss %d' \
+           % (none,single,solvedcount,unsolvedcount,multiple,maxroot_hit, \
+               maxroot_miss, maxpattern_hit, maxpattern_miss, multmaxroot_hit, multmaxroot_miss, multmaxpattern_hit, multmaxpattern_miss) 
     endtime = time.time()
     print '... program took %d seconds ' % np.int(endtime-starttime)
 
